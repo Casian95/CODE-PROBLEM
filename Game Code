@@ -1,0 +1,889 @@
+#include <GL/freeglut.h>
+#include<stdio.h>
+#include<stdlib.h>
+#include<time.h>
+#include<string.h>
+#include<ctype.h>
+
+int scanint(void) {
+	char caracter[60];
+	scanf("%s", caracter);
+	if (isdigit(caracter[0]))
+		return caracter[0] - 48;
+	else
+		return 0;
+}
+void drawText(float x, float y, const char *string) {
+	glRasterPos2f(x, y);
+	for (int i = 0; string[i] != '\0'; i++) {
+		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, string[i]);
+	}
+}
+void display() {
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glColor3f(1.0f, 1.0f, 1.0f);
+	void renderBitmapString(float x, float y, void *font, char *string) {
+		char *c;
+		glRasterPos2f(x, y);
+		for (c = string; *c != '\0'; c++) {
+			glutBitmapCharacter(font, *c);
+		}
+	}
+
+	//variabile necesare
+	char nume[30];
+	int optiune = 0;
+	int hp_player = 100;
+	int hp_enemy;
+	int atac_player;
+	int atac_special;
+	int atac_enemy;
+	int merge = 0; //  RULAREA JOCULUI
+	int nivel_curent = 0;
+	srand(time(0));
+	int fricos = 0; //EXPERIMENTAL
+	while (merge == 0) {
+		glutMainLoop();
+		while (nivel_curent == 0) {
+			system("cls");
+			drawText(-0.9f, 0.9f,
+					"Hello my friend, and welcome to\n\tTHE\n\t\tLOST\n\t\t\tKEY!\nThe goal is simple:try and beat the game\n\t\tDunno if u can do it tho ;)\nBut first,mind telling us your name?\n ");
+
+			scanf("%s", nume);
+			renderBitmapString(-0.9f, 0.9f,
+					"\nNice to meet you %s, get ready to explore!\nLet's start!\n",
+					nume);
+
+			drawText(-0.9f, 0.9f, "1 = Start the game\n");
+
+			drawText(-0.9f, 0.9f, "2 = Credits\n");
+
+			drawText(-0.9f, 0.9f, "3 = Exit Game\n");
+
+			optiune = scanint();
+			switch (optiune) {
+			case 1:
+				nivel_curent = 1;
+				break;
+			case 2:
+				nivel_curent = 12;
+				break;
+			case 3:
+				return;
+			}
+		}
+		while (nivel_curent == 1) {
+
+			renderBitmapString(-0.9f, 0.9f,
+					"In a mysterious world, a lone adventurer named %s embarked on a daring quest. Their mission: to find the ancient Key of Destiny.\n",
+					nume);
+
+			renderBitmapString(-0.9f, 0.9f,
+					"In order to find that mysterious key,%s will have to traverse through treacherous terrains, navigating through dense forests, scaling towering mountains, and braving dark caverns.WHEre Do YOU WANT TO GO FIRST?\n\n",
+					nume);
+
+			drawText(-0.9f, 0.9f, "1 = Treacherous Terrains\n");
+
+			drawText(-0.9f, 0.9f, "2 = Hill Of Despair\n");
+
+			optiune = scanint();	//Scans the player's choice
+			switch (optiune) {//Sets the nivel_curent variable according to where the player is supposed to go from the 'choice' variable
+			case 1:
+				nivel_curent = 2;
+				break;
+			case 2:
+				nivel_curent = 3;
+				break;
+			default:
+				break;
+			}
+
+		}
+		//nivel 2
+		while (nivel_curent == 2) {
+			drawText(-0.9f, 0.9f,
+					"You just reached Treacherous terrain.Going through it,you see a bush and decide to see what is in there.\nYOU FOUND YOUR FIRST ENEMY:\nZigglethorn the Clumsy Boulder");
+
+			hp_enemy = 45;
+			atac_player = rand() % 90 + 30;
+			atac_enemy = rand() % 20 + 1;
+			while (hp_player > 0 && hp_enemy > 0) {
+				renderBitmapString(-0.9f, 0.9f, "\nPlayer HP: %d", hp_player);
+				renderBitmapString(-0.9f, 0.9f, "\nEnemy HP: %d", hp_enemy);
+				drawText(-0.9f, 0.9f, "1. Attack\n");
+
+				drawText(-0.9f, 0.9f, "2. Defend\n");
+
+				drawText(-0.9f, 0.9f, "3. Run\n");
+
+				drawText(-0.9f, 0.9f, "Enter your choice: ");
+
+				scanf("%d", &optiune);
+				switch (optiune) {
+				case 1:
+					hp_enemy -= atac_player;
+					renderBitmapString(-0.9f, 0.9f,
+							"You attack the enemy, dealing %d damage!\n",
+							atac_player);
+					break;
+				case 2:
+					drawText(-0.9f, 0.9f,
+							"You choose to defend and take reduced damage.\n");
+					hp_player -= atac_enemy * 0.2;
+					break;
+				case 3:
+					drawText(-0.9f, 0.9f, "You choose to run away!\n");
+					fricos++;
+					if (fricos == 3) {
+						drawText(-0.9f, 0.9f, "YOU'RE A CHICKEN,BRO!");
+						return;
+					}
+					break;
+				}
+
+				if (hp_enemy <= 0) {
+					drawText(-0.9f, 0.9f,
+							"Congratulations! You defeated the enemy!\n\n");
+					break;
+				}
+
+				hp_player -= atac_enemy;
+				renderBitmapString(-0.9f, 0.9f,
+						"The enemy attacks you, dealing %d damage!\n",
+						atac_enemy);
+
+				if (hp_player <= 0) {
+					drawText(-0.9f, 0.9f,
+							"Game Over! You were defeated by the enemy!\n");
+				}
+			}
+			drawText(-0.9f, 0.9f, "Choose where to go next:\n");
+
+			drawText(-0.9f, 0.9f, "1 = Go to Hill Of Despair\n");
+
+			drawText(-0.9f, 0.9f, "2 = Go to Dense Forest\n");
+
+			optiune = scanint();
+			switch (optiune) {
+			case 1:
+				nivel_curent = 3;
+				break;
+			case 2:
+				nivel_curent = 4;
+				break;
+			default:
+				break;
+			}
+		}
+		while (nivel_curent == 3) {
+			drawText(-0.9f, 0.9f,
+					"You just entered Hill Of Despair. Trying to get past the first uphill,you see a man. You're starting to run away,but he appears in front of you.\nYOU JUST ENCOUNTERED YOUR ENEMY:\n\t Grimblebottom the Miserable Mound\n");
+
+			hp_enemy = 60;
+			atac_player = rand() % 90 + 30;
+			atac_enemy = rand() % 20 + 7;
+			while (hp_player > 0 && hp_enemy > 0) {
+				renderBitmapString(-0.9f, 0.9f, "\nPlayer HP: %d", hp_player);
+
+				drawText(-0.9f, 0.9f, "1. Attack\n");
+
+				drawText(-0.9f, 0.9f, "2. Defend\n");
+
+				drawText(-0.9f, 0.9f, "3. Run\n");
+
+				drawText(-0.9f, 0.9f, "Enter your choice: ");
+
+				scanf("%d", &optiune);
+				switch (optiune) {
+				case 1:
+					hp_enemy -= atac_player;
+					renderBitmapString(-0.9f, 0.9f,
+							"You attack the enemy, dealing %d damage!\n",
+							atac_player);
+					break;
+				case 2:
+					drawText(-0.9f, 0.9f,
+							"You choose to defend and take reduced damage.\n");
+					hp_player -= atac_enemy * 0.2;
+					break;
+				case 3:
+					drawText(-0.9f, 0.9f, "You choose to run away!\n");
+					fricos++;
+					if (fricos == 3) {
+						drawText(-0.9f, 0.9f, "YOU'RE A CHICKEN,BRO!");
+						return;
+					}
+					break;
+				default:
+					drawText(-0.9f, 0.9f, "Invalid choice!\n");
+					continue;
+				}
+
+				if (hp_enemy <= 0) {
+					drawText(-0.9f, 0.9f,
+							"Congratulations! You defeated the enemy!\n\n");
+					break;
+				}
+
+				hp_player -= atac_enemy;
+				renderBitmapString(-0.9f, 0.9f,
+						"The enemy attacks you, dealing %d damage!\n",
+						atac_enemy);
+
+				if (hp_player <= 0) {
+					drawText(-0.9f, 0.9f,
+							"Game Over! You were defeated by the enemy!\n");
+				}
+			}
+			drawText(-0.9f, 0.9f, "Choose where to go next:\n");
+
+			drawText(-0.9f, 0.9f, "1 = Go To Dense Forest\n");
+
+			drawText(-0.9f, 0.9f, "2 = EXIT\n");
+
+			optiune = scanint();
+			switch (optiune) {
+			case 1:
+				nivel_curent = 4;
+				break;
+			case 2:
+				drawText(-0.9f, 0.9f, "You exited the game");
+				return;
+			}
+		}
+		while (nivel_curent == 4) {
+
+			drawText(-0.9f, 0.9f,
+					"You got past the Hill Of Despair and just entered The Dense Forest.Here all you can see are just trees.But u still decide to take a look inside the forest. There you saw a cute little bunny.\nBut when it sensed you,he transformed in a ferocious monster.\n YOU ENCOUNTERED YOUR ENEMY:\n\tFlufflethorn the Mischievous Bunny\n");
+
+			hp_enemy = 80;
+			atac_player = rand() % 90 + 40;
+			atac_enemy = rand() % 20 + 10;
+			while (hp_player > 0 && hp_enemy > 0) {
+				renderBitmapString(-0.9f, 0.9f, "\nPlayer HP: %d", hp_player);
+
+				drawText(-0.9f, 0.9f, "1. Attack\n");
+
+				drawText(-0.9f, 0.9f, "2. Defend\n");
+
+				drawText(-0.9f, 0.9f, "3. Run\n");
+
+				drawText(-0.9f, 0.9f, "Enter your choice: ");
+
+				scanf("%d", &optiune);
+
+				switch (optiune) {
+				case 1:
+					hp_enemy -= atac_player;
+					renderBitmapString(-0.9f, 0.9f,
+							"You attack the enemy, dealing %d damage!\n",
+							atac_player);
+					break;
+				case 2:
+					drawText(-0.9f, 0.9f,
+							"You choose to defend and take reduced damage.\n");
+					hp_player -= atac_enemy * 0.2;
+					break;
+				case 3:
+					drawText(-0.9f, 0.9f, "You choose to run away!\n");
+					fricos++;
+					if (fricos == 3) {
+						drawText(-0.9f, 0.9f, "YOU'RE A CHICKEN,BRO!");
+						return;
+					}
+					break;
+				default:
+					drawText(-0.9f, 0.9f, "Invalid choice!\n");
+					continue;
+				}
+
+				if (hp_enemy <= 0) {
+					drawText(-0.9f, 0.9f,
+							"Congratulations! You defeated the Bunny!\n\n");
+					break;
+				}
+
+				hp_player -= atac_enemy;
+				renderBitmapString(-0.9f, 0.9f,
+						"The enemy attacks you, dealing %d damage!\n",
+						atac_enemy);
+
+				if (hp_player <= 0) {
+					drawText(-0.9f, 0.9f,
+							"Game Over! You were defeated by the enemy!\n");
+				}
+			}
+			drawText(-0.9f, 0.9f, "Choose where to go next:\n");
+
+			drawText(-0.9f, 0.9f, "1 = Even Denser Forest\n");
+
+			drawText(-0.9f, 0.9f, "2 = Tropical Resort\n");
+
+			drawText(-0.9f, 0.9f, "3 = Exit\n");
+			optiune = scanint();
+			switch (optiune) {
+			case 1:
+				nivel_curent = 5;
+				break;
+			case 2:
+				nivel_curent = 7;
+				break;
+			case 3:
+				drawText(-0.9f, 0.9f, "You exited the game");
+				return;
+
+			}
+		}
+		while (nivel_curent == 5) {
+
+			drawText(-0.9f, 0.9f,
+					"There is a speech in Romania: AI CAZUT DIN LAC IN PUT! That means you just got in a Even Denser Forest.Runnin around the forest,you discovered a suspicious worm and you touched it.\nIt transformed in a marvelous fire-spitting dragon.\nYOU JUST ENCOUNTERED YOUR ENEMY:\n\tSnagglepuff the Marvelous Dragon");
+
+			hp_enemy = 90;
+			atac_player = rand() % 90 + 35;
+			atac_enemy = rand() % 30 + 5;
+			while (hp_player > 0 && hp_enemy > 0) {
+				renderBitmapString(-0.9f, 0.9f, "\nPlayer HP: %d", hp_player);
+
+				drawText(-0.9f, 0.9f, "1. Attack\n");
+
+				drawText(-0.9f, 0.9f, "2. Defend\n");
+
+				drawText(-0.9f, 0.9f, "3. Run\n");
+
+				drawText(-0.9f, 0.9f, "Enter your choice: ");
+
+				scanf("%d", &optiune);
+
+				switch (optiune) {
+				case 1:
+					hp_enemy -= atac_player;
+					renderBitmapString(-0.9f, 0.9f,
+							"You attack the enemy, dealing %d damage!\n",
+							atac_player);
+					break;
+				case 2:
+					drawText(-0.9f, 0.9f,
+							"You choose to defend and take reduced damage.\n");
+					hp_player -= atac_enemy * 0.2;
+					break;
+				case 3:
+					drawText(-0.9f, 0.9f, "You choose to run away!\n");
+					fricos++;
+					if (fricos == 3) {
+						drawText(-0.9f, 0.9f, "YOU'RE A CHICKEN,BRO!");
+						return;
+					}
+					break;
+				default:
+					drawText(-0.9f, 0.9f, "Invalid choice!\n");
+					continue;
+				}
+
+				if (hp_enemy <= 0) {
+					drawText(-0.9f, 0.9f,
+							"Congratulations! You defeated the DRAGON!\nHE PROMISED YOU TO GIVE YOU HIS LIVES\n\tYou Got Your HP Back! \n\n");
+					break;
+				}
+
+				hp_player -= atac_enemy;
+				renderBitmapString(-0.9f, 0.9f,
+						"The enemy attacks you, dealing %d damage!\n",
+						atac_enemy);
+
+				if (hp_player <= 0) {
+					drawText(-0.9f, 0.9f,
+							"Game Over! You were defeated by the enemy!\n");
+				}
+			}
+			drawText(-0.9f, 0.9f, "Choose where to go next:");
+
+			drawText(-0.9f, 0.9f, "1 = Tropical Beach");
+
+			drawText(-0.9f, 0.9f, "2 = Towering Mountains");
+
+			drawText(-0.9f, 0.9f, "3 = Exit");
+			optiune = scanint();
+			switch (optiune) {
+			case 1:
+				nivel_curent = 6;
+				break;
+			case 2:
+				nivel_curent = 8;
+				break;
+			case 3:
+				drawText(-0.9f, 0.9f, "You exited the game");
+				return;
+
+			}
+		}
+		while (nivel_curent == 6) {
+
+			drawText(-0.9f, 0.9f,
+					"After your fight ,you decided to go in a little vacation. You entered Tropical Beach.There you see a lot of beautiful girls and decide to talk to them.\nYOU ENCOUNTERED YOUR ENEMY:\n\t SANDY SEASHELL");
+
+			hp_enemy = 100;
+			atac_player = rand() % 90 + 20;
+			atac_enemy = rand() % 15 + 1;
+			while (hp_player > 0 && hp_enemy > 0) {
+				renderBitmapString(-0.9f, 0.9f, "\nPlayer HP: %d", hp_player);
+
+				drawText(-0.9f, 0.9f, "1. Attack\n");
+
+				drawText(-0.9f, 0.9f, "2. Defend\n");
+
+				drawText(-0.9f, 0.9f, "3. Run\n");
+
+				drawText(-0.9f, 0.9f, "Enter your choice: ");
+
+				scanf("%d", &optiune);
+
+				switch (optiune) {
+				case 1:
+					hp_enemy -= atac_player;
+					renderBitmapString(-0.9f, 0.9f,
+							"You tried to flirt with her ,dealing %d heart damage\n",
+							atac_player);
+					break;
+				case 2:
+					drawText(-0.9f, 0.9f,
+							"You choose to defend and take reduced damage.\n");
+					hp_player -= atac_enemy * 0.2;
+					break;
+				case 3:
+					drawText(-0.9f, 0.9f, "You choose to run away!\n");
+					fricos++;
+					if (fricos == 3) {
+						drawText(-0.9f, 0.9f, "YOU'RE A CHICKEN,BRO!");
+						return;
+					}
+					break;
+				default:
+					drawText(-0.9f, 0.9f, "Invalid choice!\n");
+					continue;
+				}
+
+				if (hp_enemy <= 0) {
+					drawText(-0.9f, 0.9f,
+							"Congratulations! You dealt enough damage to make her cry and go home!That made you a bit more powerful.Now you're dealing more damange. \n\n");
+					break;
+				}
+
+				hp_player -= atac_enemy;
+				renderBitmapString(-0.9f, 0.9f,
+						"The girl is rejecting you,dealing %d emotional damage\n",
+						atac_enemy);
+
+				if (hp_player <= 0) {
+					drawText(-0.9f, 0.9f,
+							"YOU JUST LOST TO A GIRL!GO HOME AND SLEEP\n");
+				}
+			}
+			drawText(-0.9f, 0.9f, "Choose where to go next:\n");
+
+			drawText(-0.9f, 0.9f, "1 = Tropical resort\n");
+
+			drawText(-0.9f, 0.9f, "2 = Towering mountains\n");
+
+			drawText(-0.9f, 0.9f, "3 = Exit\n");
+			optiune = scanint();
+			switch (optiune) {
+			case 1:
+				nivel_curent = 7;
+				break;
+			case 2:
+				nivel_curent = 8;
+				break;
+			case 3:
+				drawText(-0.9f, 0.9f, "You exited the game");
+				return;
+
+			}
+		}
+		while (nivel_curent == 7) {
+
+			drawText(-0.9f, 0.9f,
+					"After dealing with girls,you decide that it's better for you to just rest,so you entered Tropical Resort.Here you meet POSEIDON and after a little talk you realize that Sandy was HIS DAUGHTER.\nNow he's mad,so YOU JUST ENCOUNTERED YOUR ENEMY:\n\tPOSEIDON");
+
+			hp_enemy = 100;
+			atac_player = rand() % 100 + 35;
+			atac_enemy = rand() % 30 + 10;
+			while (hp_player > 0 && hp_enemy > 0) {
+				renderBitmapString(-0.9f, 0.9f, "\nPlayer HP: %d", hp_player);
+
+				drawText(-0.9f, 0.9f, "1. Attack\n");
+
+				drawText(-0.9f, 0.9f, "2. Defend\n");
+
+				drawText(-0.9f, 0.9f, "3. Run\n");
+
+				drawText(-0.9f, 0.9f, "Enter your choice: ");
+
+				scanf("%d", &optiune);
+
+				switch (optiune) {
+				case 1:
+					hp_enemy -= atac_player;
+					renderBitmapString(-0.9f, 0.9f,
+							"You attacked POSEIDON, dealing %d damage!\n",
+							atac_player);
+					break;
+				case 2:
+					drawText(-0.9f, 0.9f,
+							"You choose to defend but he's still beating you.\n");
+					hp_player -= atac_enemy * 0.2;
+					break;
+				case 3:
+					drawText(-0.9f, 0.9f, "You choose to run away!\n");
+					fricos++;
+					if (fricos == 3) {
+						drawText(-0.9f, 0.9f, "YOU'RE A CHICKEN,BRO!");
+						return;
+					}
+					break;
+				default:
+					drawText(-0.9f, 0.9f, "Invalid choice!\n");
+					continue;
+				}
+
+				if (hp_enemy <= 0) {
+					drawText(-0.9f, 0.9f,
+							"Congratulations! You defeated POSEIDON!\nHE PROMISED YOU TO GIVE YOU A WATER HEART\n\tYou Got More HP!(+50) \n\n");
+					break;
+				}
+
+				hp_player -= atac_enemy;
+				renderBitmapString(-0.9f, 0.9f,
+						"POSEIDON attacks you, dealing %d damage!\n",
+						atac_enemy);
+
+				if (hp_player <= 0) {
+					drawText(-0.9f, 0.9f,
+							"Game Over! You were defeated by POSEIDON!\n");
+				}
+			}
+			drawText(-0.9f, 0.9f, "Choose where to go next:\n");
+
+			drawText(-0.9f, 0.9f, "1 = Towering Mountains\n");
+
+			drawText(-0.9f, 0.9f, "2 = Even Denser Forest\n");
+
+			drawText(-0.9f, 0.9f, "3 = Exit\n");
+			optiune = scanint();
+			switch (optiune) {
+			case 1:
+				nivel_curent = 8;
+				break;
+			case 2:
+				nivel_curent = 5;
+				break;
+			case 3:
+				drawText(-0.9f, 0.9f, "You exited the game");
+				return;
+
+			}
+		}
+		hp_player += 50;
+		while (nivel_curent == 8) {
+
+			drawText(-0.9f, 0.9f,
+					"Trying to escape from last location,you discovered that you have a mysterious item.Willing to throw it,you discovered that you have a new attack.\nIt can deal up to 250 damage ,but it starts from 20.\nPlaying with it,you ran into a black goat,and now it want to kill you.\nYOU JUST ENCOUNTERED YOUR ENEMY:\n\tTHE BLACK PHILLIP");
+
+			hp_enemy = 120;
+			atac_player = rand() % 90 + 35;
+			atac_enemy = rand() % 30 + 5;
+			atac_special = rand() % 230 + 20;
+			while (hp_player > 0 && hp_enemy > 0) {
+				renderBitmapString(-0.9f, 0.9f, "\nPlayer HP: %d", hp_player);
+
+				drawText(-0.9f, 0.9f, "1. Attack\n");
+
+				drawText(-0.9f, 0.9f, "2.Special Attack\n");
+
+				drawText(-0.9f, 0.9f, "3. Defend\n");
+
+				drawText(-0.9f, 0.9f, "4. Run\n");
+
+				drawText(-0.9f, 0.9f, "Enter your choice: ");
+
+				scanf("%d", &optiune);
+
+				switch (optiune) {
+				case 1:
+					hp_enemy -= atac_player;
+					renderBitmapString(-0.9f, 0.9f,
+							"You attack the enemy, dealing %d damage!\n",
+							atac_player);
+					break;
+				case 2:
+					hp_enemy -= atac_special;
+					renderBitmapString(-0.9f, 0.9f,
+							"You used you special attack,dealing %d damage!\n",
+							atac_special);
+					break;
+				case 3:
+					drawText(-0.9f, 0.9f,
+							"You choose to defend and take reduced damage.\n");
+					hp_player -= atac_enemy * 0.2;
+					break;
+				case 4:
+					drawText(-0.9f, 0.9f, "You choose to run away!\n");
+					fricos++;
+					if (fricos == 3) {
+						drawText(-0.9f, 0.9f, "YOU'RE A CHICKEN,BRO!");
+						return;
+					}
+					break;
+				default:
+					drawText(-0.9f, 0.9f, "Invalid choice!\n");
+					continue;
+				}
+
+				if (hp_enemy <= 0) {
+					drawText(-0.9f, 0.9f,
+							"Congratulations! You defeated THE BLACK PHILLIP.He blessed you and give 100 HP! \n\n");
+					break;
+				}
+
+				hp_player -= atac_enemy;
+				renderBitmapString(-0.9f, 0.9f,
+						"The enemy attacks you, dealing %d damage!\n",
+						atac_enemy);
+
+				if (hp_player <= 0) {
+					drawText(-0.9f, 0.9f,
+							"Game Over! You were defeated by the enemy!\n");
+				}
+			}
+			drawText(-0.9f, 0.9f, "Choose where to go next:\n");
+
+			drawText(-0.9f, 0.9f, "1 = Tropical Beach\n");
+
+			drawText(-0.9f, 0.9f, "2 = Dark caverns\n");
+
+			drawText(-0.9f, 0.9f, "3 = Exit\n");
+			optiune = scanint();
+			switch (optiune) {
+			case 1:
+				nivel_curent = 6;
+				break;
+			case 2:
+				nivel_curent = 9;
+				break;
+			case 3:
+				drawText(-0.9f, 0.9f, "You exited the game");
+				return;
+
+			}
+		}
+		hp_player += 100;
+		while (nivel_curent == 9) {
+
+			drawText(-0.9f, 0.9f,
+					"After dealing with goats and leaving the mountain,you see a little cave rising from the ground.Deciding to enter it,you felt in the Dark Caverns.\nYou remember something about a cavern in some  old stories about the LOST KEY,so you're advancing in the cave.\nYOU ENCOUNTERED YOUR ENEMY:\n\tThe Big Bat");
+
+			hp_enemy = 120;
+			atac_player = rand() % 90 + 35;
+			atac_enemy = rand() % 30 + 5;
+			atac_special = rand() % 230 + 20;
+			while (hp_player > 0 && hp_enemy > 0) {
+				renderBitmapString(-0.9f, 0.9f, "\nPlayer HP: %d", hp_player);
+
+				drawText(-0.9f, 0.9f, "1. Attack\n");
+
+				drawText(-0.9f, 0.9f, "2.Special Attack\n");
+
+				drawText(-0.9f, 0.9f, "3. Defend\n");
+
+				drawText(-0.9f, 0.9f, "4. Run\n");
+
+				drawText(-0.9f, 0.9f, "Enter your choice: ");
+
+				scanf("%d", &optiune);
+
+				switch (optiune) {
+				case 1:
+					hp_enemy -= atac_player;
+					renderBitmapString(-0.9f, 0.9f,
+							"You attack the enemy, dealing %d damage!\n",
+							atac_player);
+					break;
+				case 2:
+					hp_enemy -= atac_special;
+					renderBitmapString(-0.9f, 0.9f,
+							"You used you special attack,dealing %d damage!\n",
+							atac_special);
+					break;
+				case 3:
+					drawText(-0.9f, 0.9f,
+							"You choose to defend and take reduced damage.\n");
+					hp_player -= atac_enemy * 0.2;
+					break;
+				case 4:
+					drawText(-0.9f, 0.9f, "You choose to run away!\n");
+					fricos++;
+					if (fricos == 3) {
+						drawText(-0.9f, 0.9f, "YOU'RE A CHICKEN,BRO!");
+						return;
+					}
+					break;
+				default:
+					drawText(-0.9f, 0.9f, "Invalid choice!\n");
+					continue;
+				}
+
+				if (hp_enemy <= 0) {
+					drawText(-0.9f, 0.9f,
+							"Congratulations! You defeated The Big Bat! \n\n");
+					break;
+				}
+
+				hp_player -= atac_enemy;
+				renderBitmapString(-0.9f, 0.9f,
+						"The enemy attacks you, dealing %d damage!\n",
+						atac_enemy);
+
+				if (hp_player <= 0) {
+					drawText(-0.9f, 0.9f,
+							"Game Over! You were defeated by the enemy!\n");
+				}
+			}
+			drawText(-0.9f, 0.9f, "Choose where to go next:\n");
+
+			drawText(-0.9f, 0.9f, "1 = Enchanted Labyrinth\n");
+
+			drawText(-0.9f, 0.9f, "2 = Exit\n");
+
+			optiune = scanint();
+			switch (optiune) {
+			case 1:
+				nivel_curent = 10;
+				break;
+			case 2:
+				drawText(-0.9f, 0.9f, "You exited the game");
+				return;
+
+			}
+		}
+		hp_player += 75;
+		while (nivel_curent == 10) {
+
+			renderBitmapString(-0.9f, 0.9f,
+					"(got +75HP)After beating the bats,you're going a but further and see The Key Of Destiny,placed on a shiny marble shrine.When you almost got it,the ground starts to shake and the key Guardian appears in front of you.\nIt changed its appearence and it's looking like you.\nYOU ENCOUNTERED YOUR FINAL ENEMY:\n\tThe Evil %s",
+					nume);
+
+			hp_enemy = 200;
+			atac_player = rand() % 90 + 30;
+			atac_enemy = rand() % 50 + 5;
+			atac_special = rand() % 230 + 20;
+			while (hp_player > 0 && hp_enemy > 0) {
+				renderBitmapString(-0.9f, 0.9f, "\nPlayer HP: %d", hp_player);
+
+				drawText(-0.9f, 0.9f, "1. Attack\n");
+
+				drawText(-0.9f, 0.9f, "2.Special Attack\n");
+
+				drawText(-0.9f, 0.9f, "3. Defend\n");
+
+				drawText(-0.9f, 0.9f, "4. Run\n");
+
+				drawText(-0.9f, 0.9f, "Enter your choice: ");
+
+				scanf("%d", &optiune);
+
+				switch (optiune) {
+				case 1:
+					hp_enemy -= atac_player;
+					renderBitmapString(-0.9f, 0.9f,
+							"You attacked the Guardian, dealing %d damage!\n",
+							atac_player);
+					break;
+				case 2:
+					hp_enemy -= atac_special;
+					renderBitmapString(-0.9f, 0.9f,
+							"You used your special attack,dealing %d damage!\n",
+							atac_special);
+					break;
+				case 3:
+					drawText(-0.9f, 0.9f,
+							"You choose to defend and take reduced damage.\n");
+					hp_player -= atac_enemy * 0.2;
+					break;
+				case 4:
+					drawText(-0.9f, 0.9f, "You choose to run away!\n");
+					fricos++;
+					if (fricos == 3) {
+						drawText(-0.9f, 0.9f, "YOU'RE A CHICKEN,BRO!");
+						return;
+					}
+					break;
+				default:
+					drawText(-0.9f, 0.9f, "Invalid choice!\n");
+					continue;
+				}
+
+				if (hp_enemy <= 0) {
+					drawText(-0.9f, 0.9f,
+							"Congratulations!You defeated The Key Guardian \n\n");
+					drawText(-0.9f, 0.9f,
+							"YOU DID IT!! YOU GOT THE DESTINY KEY AND SOLD IT ON THE BLACK MARKET TO BUY THE NEW IPHONE 24. CONGRATULATIONS!\n");
+					break;
+				}
+
+				hp_player -= atac_enemy;
+				renderBitmapString(-0.9f, 0.9f,
+						"The Guardian attacks you, dealing %d damage!\n",
+						atac_enemy);
+
+				if (hp_player <= 0) {
+					drawText(-0.9f, 0.9f,
+							"Game Over! You were defeated by the Guardian!\n");
+
+				}
+			}
+
+			drawText(-0.9f, 0.9f, "Choose what to do next:\n");
+
+			drawText(-0.9f, 0.9f, "1 = START AGAIN\n");
+
+			drawText(-0.9f, 0.9f, "2 = Exit\n");
+
+			optiune = scanint();
+			switch (optiune) {
+			case 1:
+				merge = 1;
+				break;
+			case 2:
+				return;
+				break;
+			}
+		}
+		while (nivel_curent == 12) {
+			drawText(-0.9f, 0.9f,
+					"Joc realizat de Let Dumitru-Casian\n\tGrupa 6105 B\nJoc creat pentru proiect PCLP 2\n\tAll rights reserved ®.\n");
+
+			drawText(-0.9f, 0.9f, "1-Back to start\n");
+
+			drawText(-0.9f, 0.9f, "2-Exit Game\n");
+
+			optiune = scanint();
+			switch (optiune) {
+			case 1:
+				nivel_curent = 1;
+				break;
+			case 2:
+				return;
+			}
+		}
+
+	}
+}
+
+int main(int argc, char **argv) {
+	glutInit(&argc, argv);
+	glutInitWindowSize(800, 600);
+	glutCreateWindow("THE LOST KEY");
+	glutDisplayFunc(display);
+}
+
